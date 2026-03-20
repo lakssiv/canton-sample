@@ -1,0 +1,289 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module Canton.Network.RC2.Holding (
+        type Canton.Network.RC2.Holding.InstrumentId(Canton.Network.RC2.Holding.InstrumentId,
+                                                     id, admin),
+        type Canton.Network.RC2.Holding.Lock(Canton.Network.RC2.Holding.Lock,
+                                             holders),
+        type Canton.Network.RC2.Holding.Holding(Canton.Network.RC2.Holding.Holding),
+        type Canton.Network.RC2.Holding.HoldingView(Canton.Network.RC2.Holding.HoldingView,
+                                                    metadata, lock, amount, instrumentId, owner)
+    ) where
+import Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Exception
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+    ()
+import CurrentSdk.DA.Internal.LF
+import CurrentSdk.DA.Internal.Prelude
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Prelude
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record
+import CurrentSdk.DA.Internal.Template
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Map
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Monoid
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Time
+    ()
+import CurrentSdk.Data.String
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes
+import CurrentSdk.GHC.Err
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show
+import CurrentSdk.GHC.Types
+data HoldingView
+  = HoldingView {owner :: CurrentSdk.DA.Internal.LF.Party,
+                 instrumentId :: Canton.Network.RC2.Holding.InstrumentId,
+                 amount :: (CurrentSdk.GHC.Types.Numeric 10),
+                 lock :: (CurrentSdk.DA.Internal.Prelude.Optional Canton.Network.RC2.Holding.Lock),
+                 metadata :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data Lock = Lock {holders :: ([] CurrentSdk.DA.Internal.LF.Party)}
+data InstrumentId
+  = InstrumentId {admin :: CurrentSdk.DA.Internal.LF.Party,
+                  id :: CurrentSdk.GHC.Types.Text}
+data CurrentSdk.GHC.Types.DamlInterface => Holding
+  = Holding CurrentSdk.GHC.Types.Opaque
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC2.Holding.Lock) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC2.Holding.InstrumentId) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC2.Holding.HoldingView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "owner" Canton.Network.RC2.Holding.HoldingView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "metadata" Canton.Network.RC2.Holding.HoldingView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "lock" Canton.Network.RC2.Holding.HoldingView (CurrentSdk.DA.Internal.Prelude.Optional Canton.Network.RC2.Holding.Lock))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "instrumentId" Canton.Network.RC2.Holding.HoldingView Canton.Network.RC2.Holding.InstrumentId)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "id" Canton.Network.RC2.Holding.InstrumentId CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "holders" Canton.Network.RC2.Holding.Lock ([] CurrentSdk.DA.Internal.LF.Party))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "amount" Canton.Network.RC2.Holding.HoldingView (CurrentSdk.GHC.Types.Numeric 10))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "admin" Canton.Network.RC2.Holding.InstrumentId CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Ord Canton.Network.RC2.Holding.Lock) where
+  compare _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  max _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  min _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Ord Canton.Network.RC2.Holding.InstrumentId) where
+  compare _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  max _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  min _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC2.Holding.Holding Canton.Network.RC2.Holding.Holding) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC2.Holding.Holding) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC2.Holding.Holding CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC2.Holding.Holding) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC2.Holding.Holding) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC2.Holding.Holding) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC2.Holding.Holding) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC2.Holding.Holding Canton.Network.RC2.Holding.HoldingView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC2.Holding.Holding) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC2.Holding.Holding Canton.Network.RC2.Holding.Holding) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC2.Holding.Holding Canton.Network.RC2.Holding.HoldingView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC2.Holding.Holding) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC2.Holding.Holding CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC2.Holding.Holding) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC2.Holding.Holding CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC2.Holding.Holding) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC2.Holding.Holding) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "owner" Canton.Network.RC2.Holding.HoldingView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "metadata" Canton.Network.RC2.Holding.HoldingView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "lock" Canton.Network.RC2.Holding.HoldingView (CurrentSdk.DA.Internal.Prelude.Optional Canton.Network.RC2.Holding.Lock))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "instrumentId" Canton.Network.RC2.Holding.HoldingView Canton.Network.RC2.Holding.InstrumentId)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "id" Canton.Network.RC2.Holding.InstrumentId CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "holders" Canton.Network.RC2.Holding.Lock ([] CurrentSdk.DA.Internal.LF.Party))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "amount" Canton.Network.RC2.Holding.HoldingView (CurrentSdk.GHC.Types.Numeric 10))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "admin" Canton.Network.RC2.Holding.InstrumentId CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC2.Holding.Lock) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC2.Holding.InstrumentId) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC2.Holding.HoldingView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC2.Holding.Holding) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))

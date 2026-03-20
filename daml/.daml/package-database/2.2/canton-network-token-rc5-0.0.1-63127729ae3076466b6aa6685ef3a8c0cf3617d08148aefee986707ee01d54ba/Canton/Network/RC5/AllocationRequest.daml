@@ -1,0 +1,175 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module Canton.Network.RC5.AllocationRequest (
+        type Canton.Network.RC5.AllocationRequest.AllocationRequest(Canton.Network.RC5.AllocationRequest.AllocationRequest),
+        type Canton.Network.RC5.AllocationRequest.AllocationRequestView(Canton.Network.RC5.AllocationRequest.AllocationRequestView,
+                                                                        transfers, settlement, meta)
+    ) where
+import Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata
+import Pkg_91b805b2476badb22a76a54d1b21adabcbb3c8b0033990047a9c8454528fea25.Canton.Network.RC3.TransferInstruction
+import Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Exception
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Prelude
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record
+import CurrentSdk.DA.Internal.Template
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Map
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Monoid
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Time
+    ()
+import CurrentSdk.Data.String
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes
+import CurrentSdk.GHC.Err
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show
+import CurrentSdk.GHC.Types
+data AllocationRequestView
+  = AllocationRequestView {settlement :: Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.SettlementInfo,
+                           transfers :: ([] Pkg_91b805b2476badb22a76a54d1b21adabcbb3c8b0033990047a9c8454528fea25.Canton.Network.RC3.TransferInstruction.Transfer),
+                           meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data CurrentSdk.GHC.Types.DamlInterface => AllocationRequest
+  = AllocationRequest CurrentSdk.GHC.Types.Opaque
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC5.AllocationRequest.AllocationRequestView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "transfers" Canton.Network.RC5.AllocationRequest.AllocationRequestView ([] Pkg_91b805b2476badb22a76a54d1b21adabcbb3c8b0033990047a9c8454528fea25.Canton.Network.RC3.TransferInstruction.Transfer))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "settlement" Canton.Network.RC5.AllocationRequest.AllocationRequestView Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.SettlementInfo)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC5.AllocationRequest.AllocationRequestView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC5.AllocationRequest.AllocationRequest Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC5.AllocationRequest.AllocationRequest CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC5.AllocationRequest.AllocationRequest Canton.Network.RC5.AllocationRequest.AllocationRequestView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC5.AllocationRequest.AllocationRequest Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC5.AllocationRequest.AllocationRequest Canton.Network.RC5.AllocationRequest.AllocationRequestView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC5.AllocationRequest.AllocationRequest CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC5.AllocationRequest.AllocationRequest CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "transfers" Canton.Network.RC5.AllocationRequest.AllocationRequestView ([] Pkg_91b805b2476badb22a76a54d1b21adabcbb3c8b0033990047a9c8454528fea25.Canton.Network.RC3.TransferInstruction.Transfer))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "settlement" Canton.Network.RC5.AllocationRequest.AllocationRequestView Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.SettlementInfo)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC5.AllocationRequest.AllocationRequestView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC5.AllocationRequest.AllocationRequestView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC5.AllocationRequest.AllocationRequest) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))

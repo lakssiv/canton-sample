@@ -1,0 +1,27 @@
+services:
+  vault:
+    image: hashicorp/vault:1.17
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_LOCAL_CONFIG: |
+        storage "file" {
+          path = "/vault/data"
+        }
+        listener "tcp" {
+          address = "0.0.0.0:8200"
+          tls_disable = 1
+        }
+        ui = true
+    volumes:
+      - ~/vault-data:/vault/data
+    cap_add:
+      - IPC_LOCK
+    command: server
+    networks:
+      - quickstart
+
+networks:
+  quickstart:
+    external: true

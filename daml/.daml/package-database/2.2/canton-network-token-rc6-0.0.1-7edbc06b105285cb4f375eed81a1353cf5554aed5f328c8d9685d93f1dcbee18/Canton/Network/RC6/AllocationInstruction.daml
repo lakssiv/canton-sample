@@ -1,0 +1,678 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module Canton.Network.RC6.AllocationInstruction (
+        type Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus(Canton.Network.RC6.AllocationInstruction.AIS_Failed,
+                                                                                  Canton.Network.RC6.AllocationInstruction.AIS_PendingAction,
+                                                                                  action, reason,
+                                                                                  actor),
+        type Canton.Network.RC6.AllocationInstruction.AllocationInstructionView(Canton.Network.RC6.AllocationInstruction.AllocationInstructionView,
+                                                                                allocation, status,
+                                                                                meta),
+        type Canton.Network.RC6.AllocationInstruction.AllocationFactoryView(Canton.Network.RC6.AllocationInstruction.AllocationFactoryView,
+                                                                            admin),
+        type Canton.Network.RC6.AllocationInstruction.AllocationFactory(Canton.Network.RC6.AllocationInstruction.AllocationFactory),
+        type Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate(Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate,
+                                                                                 inputHoldings,
+                                                                                 allocation,
+                                                                                 extraArgs),
+        type Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction(Canton.Network.RC6.AllocationInstruction.AOI_Instruction,
+                                                                              Canton.Network.RC6.AllocationInstruction.AOI_Allocation,
+                                                                              instruction,
+                                                                              allocation),
+        type Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult(Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult,
+                                                                                       allocationOrInstruction,
+                                                                                       meta),
+        type Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory(Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory),
+        Canton.Network.RC6.AllocationInstruction.allocationDelegationFactory_delegate,
+        Canton.Network.RC6.AllocationInstruction.allocationFactory_allocateImpl,
+        type Canton.Network.RC6.AllocationInstruction.AllocationInstruction(Canton.Network.RC6.AllocationInstruction.AllocationInstruction),
+        type Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate(Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate,
+                                                                                           delegate,
+                                                                                           allocation,
+                                                                                           extraArgs),
+        type Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult(Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult,
+                                                                                                 instruction,
+                                                                                                 meta)
+    ) where
+import Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata
+import Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding
+import Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation
+import CurrentSdk.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Exception
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+    ()
+import CurrentSdk.DA.Internal.LF
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Prelude
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record
+import CurrentSdk.DA.Internal.Template
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Map
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Monoid
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Time
+    ()
+import CurrentSdk.Data.String
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes
+import CurrentSdk.GHC.Err
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show
+import CurrentSdk.GHC.Types
+data AllocationDelegationFactory_DelegateResult
+  = AllocationDelegationFactory_DelegateResult {instruction :: (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction),
+                                                meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data AllocationDelegationFactory_Delegate
+  = AllocationDelegationFactory_Delegate {allocation :: Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView,
+                                          delegate :: CurrentSdk.DA.Internal.LF.Party,
+                                          extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data AllocationFactory_AllocateResult
+  = AllocationFactory_AllocateResult {allocationOrInstruction :: Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction,
+                                      meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data AllocationOrInstruction
+  = AOI_Allocation {allocation :: (CurrentSdk.DA.Internal.LF.ContractId Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.Allocation)} |
+    AOI_Instruction {instruction :: (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction)}
+data AllocationFactory_Allocate
+  = AllocationFactory_Allocate {allocation :: Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView,
+                                inputHoldings :: ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)),
+                                extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data AllocationFactoryView
+  = AllocationFactoryView {admin :: CurrentSdk.DA.Internal.LF.Party}
+data AllocationInstructionView
+  = AllocationInstructionView {allocation :: Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView,
+                               status :: Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus,
+                               meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data AllocationInstructionStatus
+  = AIS_PendingAction {actor :: CurrentSdk.DA.Internal.LF.Party,
+                       action :: CurrentSdk.GHC.Types.Text} |
+    AIS_Failed {reason :: CurrentSdk.GHC.Types.Text}
+data CurrentSdk.GHC.Types.DamlInterface => AllocationDelegationFactory
+  = AllocationDelegationFactory CurrentSdk.GHC.Types.Opaque
+data CurrentSdk.GHC.Types.DamlInterface => AllocationFactory
+  = AllocationFactory CurrentSdk.GHC.Types.Opaque
+data CurrentSdk.GHC.Types.DamlInterface => AllocationInstruction
+  = AllocationInstruction CurrentSdk.GHC.Types.Opaque
+allocationFactory_allocateImpl ::
+  (Canton.Network.RC6.AllocationInstruction.AllocationFactory
+   -> (Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView
+       -> (([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding))
+           -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+               -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult)))))
+allocationFactory_allocateImpl _ _ _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+allocationDelegationFactory_delegate ::
+  (Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory
+   -> (Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView
+       -> (CurrentSdk.DA.Internal.LF.Party
+           -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+               -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult)))))
+allocationDelegationFactory_delegate _ _ _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory "allocationDelegationFactory_delegate" (Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView
+                                                                                                                                                               -> (CurrentSdk.DA.Internal.LF.Party
+                                                                                                                                                                   -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                                                       -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult))))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC6.AllocationInstruction.AllocationFactory "allocationFactory_allocateImpl" (Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView
+                                                                                                                                               -> (([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding))
+                                                                                                                                                   -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                                       -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult))))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationInstructionView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "status" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "reason" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "instruction" Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "instruction" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "inputHoldings" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "delegate" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "allocationOrInstruction" Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction (CurrentSdk.DA.Internal.LF.ContractId Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.Allocation))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "admin" Canton.Network.RC6.AllocationInstruction.AllocationFactoryView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "actor" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "action" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC6.AllocationInstruction.AllocationInstruction Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC6.AllocationInstruction.AllocationInstruction Canton.Network.RC6.AllocationInstruction.AllocationInstructionView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC6.AllocationInstruction.AllocationInstruction Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC6.AllocationInstruction.AllocationInstruction Canton.Network.RC6.AllocationInstruction.AllocationInstructionView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC6.AllocationInstruction.AllocationInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC6.AllocationInstruction.AllocationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC6.AllocationInstruction.AllocationFactory Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "status" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "reason" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "instruction" Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "instruction" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC6.AllocationInstruction.AllocationInstruction))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "inputHoldings" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "delegate" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "allocationOrInstruction" Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction (CurrentSdk.DA.Internal.LF.ContractId Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.Allocation))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationInstructionView Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "allocation" Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate Pkg_7987c1b418f991134e0b80556984f8d3b1711d15e8a54b57ae1f65a12e9f8fb7.Canton.Network.RC4.Allocation.AllocationView)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "admin" Canton.Network.RC6.AllocationInstruction.AllocationFactoryView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "actor" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "action" Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationOrInstruction) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationInstructionView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationInstructionStatus) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationInstruction) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationFactory_AllocateResult) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationFactory_Allocate) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationFactoryView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationFactory) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_DelegateResult) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory_Delegate) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC6.AllocationInstruction.AllocationDelegationFactory) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))

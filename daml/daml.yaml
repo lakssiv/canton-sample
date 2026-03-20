@@ -1,0 +1,18 @@
+sdk-version: 3.4.10
+name: my-token1
+version: 0.0.2
+source: src
+parties:
+  - Alice
+  - Bob
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script
+data-dependencies:
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-1-token-metadata/.daml/dist/canton-network-token-rc1-0.0.1.dar
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-2-holdings/.daml/dist/canton-network-token-rc2-0.0.1.dar
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-3-transfer-instruction/.daml/dist/canton-network-token-rc3-0.0.1.dar
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-4-allocation/.daml/dist/canton-network-token-rc4-0.0.1.dar
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-5-allocation-request/.daml/dist/canton-network-token-rc5-0.0.1.dar
+  - /Users/thomaseapen/work/canton/cn-token-standard-proposal/cnrc-6-allocation-instruction/.daml/dist/canton-network-token-rc6-0.0.1.dar

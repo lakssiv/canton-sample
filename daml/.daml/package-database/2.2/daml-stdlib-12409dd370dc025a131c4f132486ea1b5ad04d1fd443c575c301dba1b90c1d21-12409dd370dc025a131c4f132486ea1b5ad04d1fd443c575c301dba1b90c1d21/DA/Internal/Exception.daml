@@ -1,0 +1,34 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module DA.Internal.Exception (
+        module DA.Internal.Exception,
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.ActionCatch(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.ActionThrow(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.DamlException(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasFromAnyException(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasMessage(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasThrow(..),
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasToAnyException(..),
+        type CurrentSdk.DA.Exception.PreconditionFailed.PreconditionFailed(CurrentSdk.DA.Exception.PreconditionFailed.PreconditionFailed),
+        type CurrentSdk.DA.Exception.AssertionFailed.AssertionFailed(CurrentSdk.DA.Exception.AssertionFailed.AssertionFailed),
+        type CurrentSdk.DA.Exception.ArithmeticError.ArithmeticError(CurrentSdk.DA.Exception.ArithmeticError.ArithmeticError),
+        type CurrentSdk.DA.Exception.GeneralError.GeneralError(CurrentSdk.DA.Exception.GeneralError.GeneralError)
+    ) where
+import CurrentSdk.DA.Exception.ArithmeticError
+import CurrentSdk.DA.Exception.AssertionFailed
+import CurrentSdk.DA.Exception.GeneralError
+import CurrentSdk.DA.Exception.PreconditionFailed
+import Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception
+import DA.Internal.Prelude ()
+type Exception e =
+    ((Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasThrow e),
+     (Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasMessage e),
+     (Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasToAnyException e),
+     (Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Exception.HasFromAnyException e))

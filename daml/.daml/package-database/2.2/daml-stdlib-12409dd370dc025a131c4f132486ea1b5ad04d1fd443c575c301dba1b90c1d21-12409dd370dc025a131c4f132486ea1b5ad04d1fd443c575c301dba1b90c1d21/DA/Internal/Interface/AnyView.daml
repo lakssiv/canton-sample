@@ -1,0 +1,39 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module DA.Internal.Interface.AnyView (
+        module DA.Internal.Interface.AnyView,
+        Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Interface.AnyView.HasFromAnyView(..)
+    ) where
+import CurrentSdk.DA.Internal.Any
+import DA.Internal.Exception ()
+import Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Interface.AnyView
+import CurrentSdk.DA.Internal.Interface.AnyView.Types
+import CurrentSdk.DA.Internal.Prelude
+import DA.Internal.Prelude ()
+import DA.Internal.Template.Functions
+import DA.Internal.Template.Functions ()
+import CurrentSdk.Data.String
+import CurrentSdk.GHC.Err
+fromTemplateTypeRep ::
+  (CurrentSdk.DA.Internal.Any.TemplateTypeRep
+   -> CurrentSdk.DA.Internal.Interface.AnyView.Types.InterfaceTypeRep)
+fromTemplateTypeRep _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+fromAnyView ::
+  (forall i.
+   (forall v.
+    ((DA.Internal.Template.Functions.HasTemplateTypeRep i) =>
+     ((Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Internal.Interface.AnyView.HasFromAnyView i v) =>
+      (CurrentSdk.DA.Internal.Interface.AnyView.Types.AnyView
+       -> (CurrentSdk.DA.Internal.Prelude.Optional v))))))
+fromAnyView _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))

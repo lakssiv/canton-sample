@@ -1,0 +1,347 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module Canton.Network.RC1.TokenMetadata (
+        Canton.Network.RC1.TokenMetadata.enforceMetadataLimits,
+        Canton.Network.RC1.TokenMetadata.emptyMetadata,
+        type Canton.Network.RC1.TokenMetadata.AnyValue(Canton.Network.RC1.TokenMetadata.AV_Map,
+                                                       Canton.Network.RC1.TokenMetadata.AV_List,
+                                                       Canton.Network.RC1.TokenMetadata.AV_ContractId,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Party,
+                                                       Canton.Network.RC1.TokenMetadata.AV_RelTime,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Time,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Date,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Bool,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Decimal,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Int,
+                                                       Canton.Network.RC1.TokenMetadata.AV_Text),
+        type Canton.Network.RC1.TokenMetadata.AnyContractId(),
+        type Canton.Network.RC1.TokenMetadata.ChoiceContext(),
+        type Canton.Network.RC1.TokenMetadata.Metadata(Canton.Network.RC1.TokenMetadata.Metadata,
+                                                       values),
+        type Canton.Network.RC1.TokenMetadata.ExtraArgs(Canton.Network.RC1.TokenMetadata.ExtraArgs,
+                                                        meta, context),
+        type Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata(Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata,
+                                                                      meta),
+        Canton.Network.RC1.TokenMetadata.emptyExtraArgs,
+        type Canton.Network.RC1.TokenMetadata.RegistryAppInstall(Canton.Network.RC1.TokenMetadata.RegistryAppInstall),
+        type Canton.Network.RC1.TokenMetadata.RegistryAppInstallView(Canton.Network.RC1.TokenMetadata.RegistryAppInstallView,
+                                                                     instrumentAdmin, appUser, meta)
+    ) where
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Exception
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+    ()
+import CurrentSdk.DA.Internal.LF
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Prelude
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record
+import CurrentSdk.DA.Internal.Template
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Map
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Monoid
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Time
+    ()
+import CurrentSdk.DA.Time.Types
+import CurrentSdk.Data.String
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes
+import CurrentSdk.GHC.Err
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show
+import CurrentSdk.GHC.Types
+type ChoiceContext =
+    ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) Canton.Network.RC1.TokenMetadata.AnyValue)
+type AnyContractId = (CurrentSdk.DA.Internal.LF.ContractId ())
+data RegistryAppInstallView
+  = RegistryAppInstallView {appUser :: CurrentSdk.DA.Internal.LF.Party,
+                            instrumentAdmin :: CurrentSdk.DA.Internal.LF.Party,
+                            meta :: Canton.Network.RC1.TokenMetadata.Metadata}
+data ChoiceExecutionMetadata
+  = ChoiceExecutionMetadata {meta :: Canton.Network.RC1.TokenMetadata.Metadata}
+data ExtraArgs
+  = ExtraArgs {context :: ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) Canton.Network.RC1.TokenMetadata.AnyValue),
+               meta :: Canton.Network.RC1.TokenMetadata.Metadata}
+data Metadata
+  = Metadata {values :: ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) CurrentSdk.GHC.Types.Text)}
+data AnyValue
+  = AV_Text CurrentSdk.GHC.Types.Text |
+    AV_Int CurrentSdk.GHC.Types.Int |
+    AV_Decimal (CurrentSdk.GHC.Types.Numeric 10) |
+    AV_Bool CurrentSdk.GHC.Types.Bool |
+    AV_Date CurrentSdk.DA.Internal.LF.Date |
+    AV_Time CurrentSdk.DA.Internal.LF.Time |
+    AV_RelTime CurrentSdk.DA.Time.Types.RelTime |
+    AV_Party CurrentSdk.DA.Internal.LF.Party |
+    AV_ContractId (CurrentSdk.DA.Internal.LF.ContractId ()) |
+    AV_List ([] Canton.Network.RC1.TokenMetadata.AnyValue) |
+    AV_Map ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) Canton.Network.RC1.TokenMetadata.AnyValue)
+data CurrentSdk.GHC.Types.DamlInterface => RegistryAppInstall
+  = RegistryAppInstall CurrentSdk.GHC.Types.Opaque
+enforceMetadataLimits ::
+  (Canton.Network.RC1.TokenMetadata.Metadata
+   -> (CurrentSdk.DA.Internal.LF.Update ()))
+enforceMetadataLimits _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+emptyMetadata :: Canton.Network.RC1.TokenMetadata.Metadata
+emptyMetadata
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+emptyExtraArgs :: Canton.Network.RC1.TokenMetadata.ExtraArgs
+emptyExtraArgs
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC1.TokenMetadata.RegistryAppInstallView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC1.TokenMetadata.Metadata) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC1.TokenMetadata.ExtraArgs) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC1.TokenMetadata.AnyValue) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "values" Canton.Network.RC1.TokenMetadata.Metadata ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) CurrentSdk.GHC.Types.Text))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC1.TokenMetadata.ExtraArgs Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "instrumentAdmin" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "context" Canton.Network.RC1.TokenMetadata.ExtraArgs ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) Canton.Network.RC1.TokenMetadata.AnyValue))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "appUser" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Ord Canton.Network.RC1.TokenMetadata.Metadata) where
+  compare _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  max _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  min _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC1.TokenMetadata.RegistryAppInstall Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC1.TokenMetadata.RegistryAppInstall CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC1.TokenMetadata.RegistryAppInstall Canton.Network.RC1.TokenMetadata.RegistryAppInstallView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC1.TokenMetadata.RegistryAppInstall Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC1.TokenMetadata.RegistryAppInstall Canton.Network.RC1.TokenMetadata.RegistryAppInstallView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC1.TokenMetadata.RegistryAppInstall CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC1.TokenMetadata.RegistryAppInstall CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "values" Canton.Network.RC1.TokenMetadata.Metadata ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) CurrentSdk.GHC.Types.Text))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC1.TokenMetadata.ExtraArgs Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "instrumentAdmin" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "context" Canton.Network.RC1.TokenMetadata.ExtraArgs ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.GHC.Types.Text) Canton.Network.RC1.TokenMetadata.AnyValue))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "appUser" Canton.Network.RC1.TokenMetadata.RegistryAppInstallView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.RegistryAppInstallView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.RegistryAppInstall) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.Metadata) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.ExtraArgs) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC1.TokenMetadata.AnyValue) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))

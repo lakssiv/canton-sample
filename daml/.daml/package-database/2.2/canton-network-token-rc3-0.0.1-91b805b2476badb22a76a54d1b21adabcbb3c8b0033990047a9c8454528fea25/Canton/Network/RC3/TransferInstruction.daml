@@ -1,0 +1,686 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module Canton.Network.RC3.TransferInstruction (
+        type Canton.Network.RC3.TransferInstruction.TransferInstruction(Canton.Network.RC3.TransferInstruction.TransferInstruction),
+        type Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess(Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess,
+                                                                                      extraArgs),
+        type Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer(Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer,
+                                                                                                 extraHoldingCids,
+                                                                                                 extraArgs),
+        type Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort(Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort,
+                                                                              actor, extraArgs),
+        type Canton.Network.RC3.TransferInstruction.TransferInstructionStatus(Canton.Network.RC3.TransferInstruction.TIS_Failed,
+                                                                              Canton.Network.RC3.TransferInstruction.TIS_PendingPreparatoryAction,
+                                                                              Canton.Network.RC3.TransferInstruction.TIS_PendingExecution,
+                                                                              reason, actions),
+        type Canton.Network.RC3.TransferInstruction.TransferInstructionView(Canton.Network.RC3.TransferInstruction.TransferInstructionView,
+                                                                            status,
+                                                                            transferSpecification,
+                                                                            meta),
+        type Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult(Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult,
+                                                                                   optTransferInstructionCid,
+                                                                                   meta),
+        type Canton.Network.RC3.TransferInstruction.TransferFactory(Canton.Network.RC3.TransferInstruction.TransferFactory),
+        Canton.Network.RC3.TransferInstruction.transferFactory_transferImpl,
+        Canton.Network.RC3.TransferInstruction.transferInstruction_abortImpl,
+        Canton.Network.RC3.TransferInstruction.transferInstruction_executeDelegatedTransferImpl,
+        Canton.Network.RC3.TransferInstruction.transferInstruction_reportSuccessImpl,
+        type Canton.Network.RC3.TransferInstruction.Transfer(Canton.Network.RC3.TransferInstruction.Transfer,
+                                                             receiver, sender, instrumentId, amount,
+                                                             lock, metadata),
+        type Canton.Network.RC3.TransferInstruction.TransferSpecification(Canton.Network.RC3.TransferInstruction.TransferSpecification,
+                                                                          executionDelegate,
+                                                                          holdingCids,
+                                                                          executeBefore, transfer),
+        type Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer(Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer,
+                                                                             transferSpecification,
+                                                                             extraArgs),
+        type Canton.Network.RC3.TransferInstruction.TransferFactoryView(Canton.Network.RC3.TransferInstruction.TransferFactoryView,
+                                                                        admin)
+    ) where
+import Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata
+import Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding
+import CurrentSdk.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Exception
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView
+    ()
+import CurrentSdk.DA.Internal.LF
+import CurrentSdk.DA.Internal.Prelude
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Prelude
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record
+import CurrentSdk.DA.Internal.Template
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Map
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Monoid
+    ()
+import Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Time
+    ()
+import CurrentSdk.Data.String
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes
+import CurrentSdk.GHC.Err
+import Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show
+import CurrentSdk.GHC.Types
+data TransferFactoryView
+  = TransferFactoryView {admin :: CurrentSdk.DA.Internal.LF.Party}
+data TransferFactory_Transfer
+  = TransferFactory_Transfer {transferSpecification :: Canton.Network.RC3.TransferInstruction.TransferSpecification,
+                              extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data TransferFactory_TransferResult
+  = TransferFactory_TransferResult {optTransferInstructionCid :: (CurrentSdk.DA.Internal.Prelude.Optional (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC3.TransferInstruction.TransferInstruction)),
+                                    meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data TransferInstructionView
+  = TransferInstructionView {status :: Canton.Network.RC3.TransferInstruction.TransferInstructionStatus,
+                             transferSpecification :: Canton.Network.RC3.TransferInstruction.TransferSpecification,
+                             meta :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data TransferInstructionStatus
+  = TIS_PendingPreparatoryAction {actions :: ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.DA.Internal.LF.Party) CurrentSdk.GHC.Types.Text)} |
+    TIS_PendingExecution |
+    TIS_Failed {reason :: CurrentSdk.GHC.Types.Text}
+data TransferInstruction_Abort
+  = TransferInstruction_Abort {actor :: CurrentSdk.DA.Internal.LF.Party,
+                               extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data TransferInstruction_ExecuteDelegatedTransfer
+  = TransferInstruction_ExecuteDelegatedTransfer {extraHoldingCids :: ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)),
+                                                  extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data TransferInstruction_ReportSuccess
+  = TransferInstruction_ReportSuccess {extraArgs :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs}
+data TransferSpecification
+  = TransferSpecification {transfer :: Canton.Network.RC3.TransferInstruction.Transfer,
+                           executeBefore :: CurrentSdk.DA.Internal.LF.Time,
+                           holdingCids :: ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)),
+                           executionDelegate :: (CurrentSdk.DA.Internal.Prelude.Optional CurrentSdk.DA.Internal.LF.Party)}
+data Transfer
+  = Transfer {sender :: CurrentSdk.DA.Internal.LF.Party,
+              receiver :: CurrentSdk.DA.Internal.LF.Party,
+              amount :: (CurrentSdk.GHC.Types.Numeric 10),
+              instrumentId :: Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.InstrumentId,
+              lock :: (CurrentSdk.DA.Internal.Prelude.Optional Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Lock),
+              metadata :: Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata}
+data CurrentSdk.GHC.Types.DamlInterface => TransferFactory
+  = TransferFactory CurrentSdk.GHC.Types.Opaque
+data CurrentSdk.GHC.Types.DamlInterface => TransferInstruction
+  = TransferInstruction CurrentSdk.GHC.Types.Opaque
+transferInstruction_reportSuccessImpl ::
+  (Canton.Network.RC3.TransferInstruction.TransferInstruction
+   -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+       -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata)))
+transferInstruction_reportSuccessImpl _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+transferInstruction_executeDelegatedTransferImpl ::
+  (Canton.Network.RC3.TransferInstruction.TransferInstruction
+   -> (([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding))
+       -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+           -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata))))
+transferInstruction_executeDelegatedTransferImpl _ _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+transferInstruction_abortImpl ::
+  (Canton.Network.RC3.TransferInstruction.TransferInstruction
+   -> (CurrentSdk.DA.Internal.LF.Party
+       -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+           -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata))))
+transferInstruction_abortImpl _ _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+transferFactory_transferImpl ::
+  (Canton.Network.RC3.TransferInstruction.TransferFactory
+   -> (Canton.Network.RC3.TransferInstruction.TransferSpecification
+       -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+           -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult))))
+transferFactory_transferImpl _ _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC3.TransferInstruction.TransferFactory "transferFactory_transferImpl" (Canton.Network.RC3.TransferInstruction.TransferSpecification
+                                                                                                                                         -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                             -> (CurrentSdk.DA.Internal.LF.Update Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult)))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC3.TransferInstruction.TransferInstruction "transferInstruction_abortImpl" (CurrentSdk.DA.Internal.LF.Party
+                                                                                                                                              -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                                  -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata)))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC3.TransferInstruction.TransferInstruction "transferInstruction_executeDelegatedTransferImpl" (([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding))
+                                                                                                                                                                 -> (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                                                     -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata)))
+instance CurrentSdk.DA.Internal.Desugar.HasMethod Canton.Network.RC3.TransferInstruction.TransferInstruction "transferInstruction_reportSuccessImpl" (Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs
+                                                                                                                                                      -> (CurrentSdk.DA.Internal.LF.Update Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferSpecification) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferInstructionView) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferInstructionStatus) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Show.Show Canton.Network.RC3.TransferInstruction.Transfer) where
+  showsPrec _ _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  show _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  showList _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "transferSpecification" Canton.Network.RC3.TransferInstruction.TransferInstructionView Canton.Network.RC3.TransferInstruction.TransferSpecification)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "transferSpecification" Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Canton.Network.RC3.TransferInstruction.TransferSpecification)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "transfer" Canton.Network.RC3.TransferInstruction.TransferSpecification Canton.Network.RC3.TransferInstruction.Transfer)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "status" Canton.Network.RC3.TransferInstruction.TransferInstructionView Canton.Network.RC3.TransferInstruction.TransferInstructionStatus)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "sender" Canton.Network.RC3.TransferInstruction.Transfer CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "receiver" Canton.Network.RC3.TransferInstruction.Transfer CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "reason" Canton.Network.RC3.TransferInstruction.TransferInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "optTransferInstructionCid" Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult (CurrentSdk.DA.Internal.Prelude.Optional (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC3.TransferInstruction.TransferInstruction)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "metadata" Canton.Network.RC3.TransferInstruction.Transfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC3.TransferInstruction.TransferInstructionView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "meta" Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "lock" Canton.Network.RC3.TransferInstruction.Transfer (CurrentSdk.DA.Internal.Prelude.Optional Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Lock))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "instrumentId" Canton.Network.RC3.TransferInstruction.Transfer Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.InstrumentId)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "holdingCids" Canton.Network.RC3.TransferInstruction.TransferSpecification ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraHoldingCids" Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "executionDelegate" Canton.Network.RC3.TransferInstruction.TransferSpecification (CurrentSdk.DA.Internal.Prelude.Optional CurrentSdk.DA.Internal.LF.Party))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "executeBefore" Canton.Network.RC3.TransferInstruction.TransferSpecification CurrentSdk.DA.Internal.LF.Time)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "amount" Canton.Network.RC3.TransferInstruction.Transfer (CurrentSdk.GHC.Types.Numeric 10))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "admin" Canton.Network.RC3.TransferInstruction.TransferFactoryView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "actor" Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.SetField "actions" Canton.Network.RC3.TransferInstruction.TransferInstructionStatus ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.DA.Internal.LF.Party) CurrentSdk.GHC.Types.Text))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Ord Canton.Network.RC3.TransferInstruction.Transfer) where
+  compare _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (<=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (>=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  max _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  min _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasToInterface Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _toInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyTemplate Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _toAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasToAnyChoice Canton.Network.RC3.TransferInstruction.TransferFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _toAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasTemplateTypeRep Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _templateTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasSignatory Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  signatory _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasObserver Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  observer _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Desugar.HasIsInterfaceType Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _isInterfaceType _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstructionView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceView Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactoryView) where
+  _view _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasInterfaceTypeRep Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _interfaceTypeRep _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.HasFromInterface Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  fromInterface _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  unsafeFromInterface _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstructionView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Interface.AnyView.HasFromAnyView Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactoryView) where
+  _fromAnyView _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyTemplate Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  _fromAnyTemplate _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFromAnyChoice Canton.Network.RC3.TransferInstruction.TransferFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  _fromAnyChoice _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasFetch Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  fetch _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferInstruction Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ChoiceExecutionMetadata) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferInstruction CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferFactory Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasExercise Canton.Network.RC3.TransferInstruction.TransferFactory CurrentSdk.DA.Internal.Template.Archive ()) where
+  exercise _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasCreate Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  create _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Template.Functions.HasArchive Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  archive _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "transferSpecification" Canton.Network.RC3.TransferInstruction.TransferInstructionView Canton.Network.RC3.TransferInstruction.TransferSpecification)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "transferSpecification" Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Canton.Network.RC3.TransferInstruction.TransferSpecification)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "transfer" Canton.Network.RC3.TransferInstruction.TransferSpecification Canton.Network.RC3.TransferInstruction.Transfer)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "status" Canton.Network.RC3.TransferInstruction.TransferInstructionView Canton.Network.RC3.TransferInstruction.TransferInstructionStatus)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "sender" Canton.Network.RC3.TransferInstruction.Transfer CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "receiver" Canton.Network.RC3.TransferInstruction.Transfer CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "reason" Canton.Network.RC3.TransferInstruction.TransferInstructionStatus CurrentSdk.GHC.Types.Text)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "optTransferInstructionCid" Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult (CurrentSdk.DA.Internal.Prelude.Optional (CurrentSdk.DA.Internal.LF.ContractId Canton.Network.RC3.TransferInstruction.TransferInstruction)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "metadata" Canton.Network.RC3.TransferInstruction.Transfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC3.TransferInstruction.TransferInstructionView Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "meta" Canton.Network.RC3.TransferInstruction.TransferFactory_TransferResult Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.Metadata)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "lock" Canton.Network.RC3.TransferInstruction.Transfer (CurrentSdk.DA.Internal.Prelude.Optional Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Lock))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "instrumentId" Canton.Network.RC3.TransferInstruction.Transfer Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.InstrumentId)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "holdingCids" Canton.Network.RC3.TransferInstruction.TransferSpecification ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraHoldingCids" Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer ([] (CurrentSdk.DA.Internal.LF.ContractId Pkg_a646fb89f6bc70af6e18c901512442df2a4c4b9efe4e966ce790711a4a553dc2.Canton.Network.RC2.Holding.Holding)))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "extraArgs" Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer Pkg_b698a3dc5a7608411773b30fe8deccd96a2ac4f2402a4c02f64d2ec289a2759b.Canton.Network.RC1.TokenMetadata.ExtraArgs)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "executionDelegate" Canton.Network.RC3.TransferInstruction.TransferSpecification (CurrentSdk.DA.Internal.Prelude.Optional CurrentSdk.DA.Internal.LF.Party))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "executeBefore" Canton.Network.RC3.TransferInstruction.TransferSpecification CurrentSdk.DA.Internal.LF.Time)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "amount" Canton.Network.RC3.TransferInstruction.Transfer (CurrentSdk.GHC.Types.Numeric 10))
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "admin" Canton.Network.RC3.TransferInstruction.TransferFactoryView CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "actor" Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort CurrentSdk.DA.Internal.LF.Party)
+instance (() =>
+          Pkg_12409dd370dc025a131c4f132486ea1b5ad04d1fd443c575c301dba1b90c1d21.DA.Internal.Record.GetField "actions" Canton.Network.RC3.TransferInstruction.TransferInstructionStatus ((CurrentSdk.DA.Internal.LF.Map CurrentSdk.DA.Internal.LF.Party) CurrentSdk.GHC.Types.Text))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferSpecification) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstruction_ReportSuccess) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstruction_ExecuteDelegatedTransfer) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstruction_Abort) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstructionView) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstructionStatus) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferInstruction) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferFactory_Transfer) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.TransferFactory) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+instance (() =>
+          Pkg_54f85ebfc7dfae18f7d70370015dcc6c6792f60135ab369c44ae52c6fc17c274.GHC.Classes.Eq Canton.Network.RC3.TransferInstruction.Transfer) where
+  (==) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))
+  (/=) _ _
+    = (CurrentSdk.GHC.Err.error
+         (CurrentSdk.Data.String.fromString "data-dependency stub"))

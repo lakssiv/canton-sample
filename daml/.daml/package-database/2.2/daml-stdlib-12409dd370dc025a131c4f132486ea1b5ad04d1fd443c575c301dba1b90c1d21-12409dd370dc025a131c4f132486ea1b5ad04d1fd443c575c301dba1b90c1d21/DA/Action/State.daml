@@ -1,0 +1,40 @@
+{-# LANGUAGE NoDamlSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoOverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE DatatypeContexts #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-missing-methods -Wno-deprecations -Wno-x-crypto -Wno-x-exceptions #-}
+module DA.Action.State (
+        module DA.Action.State,
+        type DA.Action.State.Class.ActionState(DA.Action.State.Class.get,
+                                               DA.Action.State.Class.put,
+                                               DA.Action.State.Class.modify),
+        type CurrentSdk.DA.Action.State.Type.State(CurrentSdk.DA.Action.State.Type.State,
+                                                   runState)
+    ) where
+import Pkg_08e57d514689e8f95f397581e060d426957a44f3dd21f82872892d6c3a117f3f.DA.Action.State
+import DA.Action.State.Class
+import CurrentSdk.DA.Action.State.Type
+import DA.Internal.Exception ()
+import DA.Internal.Interface.AnyView ()
+import DA.Internal.Prelude ()
+import DA.Internal.Template.Functions ()
+import CurrentSdk.Data.String
+import CurrentSdk.GHC.Err
+execState ::
+  (forall s.
+   (forall a.
+    (((CurrentSdk.DA.Action.State.Type.State s) a) -> (s -> s))))
+execState _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))
+evalState ::
+  (forall s.
+   (forall a.
+    (((CurrentSdk.DA.Action.State.Type.State s) a) -> (s -> a))))
+evalState _ _
+  = (CurrentSdk.GHC.Err.error
+       (CurrentSdk.Data.String.fromString "data-dependency stub"))

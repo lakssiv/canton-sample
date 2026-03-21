@@ -3,6 +3,7 @@ package org.example.canton.orchestrate;
 import org.example.canton.contact.receiver.PendingHoldings;
 import org.example.canton.deploy.DeployDar;
 import org.example.canton.deploy.ReadDeployedPackage;
+import org.example.canton.ledger.LedgerOffsetClient;
 import org.example.canton.user.onboarding.CreateUser;
 import org.example.canton.user.onboarding.PartyOnboarding;
 import org.example.canton.user.onboarding.UserToPartyMapping;
@@ -101,7 +102,14 @@ public class CantonOrchestratorUserNode {
 
 /**
  * USe latest offset - need to figure out how
- */
+ */ 
+                Long latestOffset = new LedgerOffsetClient().getLedgerEnd(
+                System.getProperty("user1_jsonapibase"),
+                System.getProperty("user1_realm"),
+                System.getProperty("user1_holder1_clientid"),
+                System.getProperty("user1_holder1_clientsecret")
+        );
+
 
         String getPendingHoldings = new PendingHoldings().findPendingHoldingContractIds(System.getProperty("user1_jsonapibase"),
                 System.getProperty("user1_realm"),
@@ -109,7 +117,7 @@ public class CantonOrchestratorUserNode {
                 System.getProperty("user1_holder1_clientsecret"),
                 System.getProperty("drl_package_id"),
                 "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b",
-                10472);
+                latestOffset);
         System.out.println("getPendingHoldings : "+ getPendingHoldings);
         List<String> pendingCid =  new PendingHoldings().extractPendingHoldingCids(getPendingHoldings);
         for(String cid : pendingCid){

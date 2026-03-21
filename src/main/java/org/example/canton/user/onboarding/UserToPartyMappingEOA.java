@@ -8,7 +8,7 @@ import org.example.canton.util.TokenGenerator;
 
 import java.io.IOException;
 
-public class UserToPartyMapping {
+public class UserToPartyMappingEOA {
     private static final OkHttpClient HTTP = new OkHttpClient();
 
     public String grantActAs(

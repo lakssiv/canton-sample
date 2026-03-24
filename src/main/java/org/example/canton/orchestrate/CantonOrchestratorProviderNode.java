@@ -29,17 +29,17 @@ public class CantonOrchestratorProviderNode {
         props.put("user1_clientsecret", "6m12QyyGl81d9nABWQXMycZdXho6ejEX");
 
         props.put("keycloakbase_url", "http://localhost:8082");
-        props.put("dar_path", "/Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token1-0.0.2.dar");
+        props.put("dar_path", "/Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token2-0.0.2.dar");
 
         //System.setProperties(props);
 
         /****
          * Figure out the template id of your dar
          * daml damlc inspect-dar --json /Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token1-0.0.2.dar
-         * Look for ---> "main_package_id": "7e6e32645c4864b476c6e5bcf88fddadadff9e7f15f61613043e04d0d2dab9f6"
+         * Look for ---> "main_package_id": "6771ae179d3feb2f3e36b31ab0933374e7274c9731305f8cdd885d36418ea5a2"
          */
 
-        props.put("drl_package_id", "7e6e32645c4864b476c6e5bcf88fddadadff9e7f15f61613043e04d0d2dab9f6");
+        props.put("drl_package_id", "6771ae179d3feb2f3e36b31ab0933374e7274c9731305f8cdd885d36418ea5a2");
 
         /****
          * Deployment of the DAR can only be done once
@@ -60,8 +60,8 @@ public class CantonOrchestratorProviderNode {
          * Response - issuerPArtyCreateResponse : {"partyDetails":{"party":"issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549","isLocal":true,"localMetadata":{"resourceVersion":"0","annotations":{}},"identityProviderId":""}}
          */
 
-        String issuerPArtyCreateResponse = new PartyOnboarding().createParty(System.getProperty("issuer_jsonapibase"), System.getProperty("issuer_realm"), System.getProperty("issuer_clientid"), System.getProperty("issuer_clientsecret"), "issuerParty", "Issuer Party");
-        System.out.println("issuerPArtyCreateResponse : "+ issuerPArtyCreateResponse);
+        /*String issuerPArtyCreateResponse = new PartyOnboarding().createParty(System.getProperty("issuer_jsonapibase"), System.getProperty("issuer_realm"), System.getProperty("issuer_clientid"), System.getProperty("issuer_clientsecret"), "issuerParty", "Issuer Party");
+        System.out.println("issuerPArtyCreateResponse : "+ issuerPArtyCreateResponse);*/
 
         /**
          *  Create a user in Provider keycloak with client_id=app-user-minter. User has a prefix serice-account and hence we will sub claim id 972c49c6-ee4f-4bcd-a012-2e34902b7cb0 -> This can be found from the token egenrated
@@ -70,8 +70,8 @@ public class CantonOrchestratorProviderNode {
          */
 
 
-        String createMinterUSerOnProviderNodeREsponse = new CreateUser().createParticipantUser(System.getProperty("issuer_jsonapibase"), System.getProperty("issuer_realm"), System.getProperty("issuer_clientid"), System.getProperty("issuer_clientsecret"), "972c49c6-ee4f-4bcd-a012-2e34902b7cb0", "issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549");
-        System.out.println("createMinterUSerOnProviderNodeREsponse : "+ createMinterUSerOnProviderNodeREsponse);
+        /*String createMinterUSerOnProviderNodeREsponse = new CreateUser().createParticipantUser(System.getProperty("issuer_jsonapibase"), System.getProperty("issuer_realm"), System.getProperty("issuer_clientid"), System.getProperty("issuer_clientsecret"), "972c49c6-ee4f-4bcd-a012-2e34902b7cb0", "issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549");
+        System.out.println("createMinterUSerOnProviderNodeREsponse : "+ createMinterUSerOnProviderNodeREsponse);*/
 
 
         /**
@@ -79,13 +79,13 @@ public class CantonOrchestratorProviderNode {
          * canActAsIssuerPRoviderNoderResp : {"newlyGrantedRights":[{"kind":{"CanActAs":{"value":{"party":"issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549"}}}}]}
          */
 
-     String canActAsIssuerPRoviderNoderResp = new UserToPartyMapping().grantActAs(System.getProperty("issuer_jsonapibase"),
+     /*String canActAsIssuerPRoviderNoderResp = new UserToPartyMapping().grantActAs(System.getProperty("issuer_jsonapibase"),
              System.getProperty("issuer_realm"),
              System.getProperty("issuer_clientid"),
              System.getProperty("issuer_clientsecret"),
              "972c49c6-ee4f-4bcd-a012-2e34902b7cb0",
              "issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549");
-     System.out.println("canActAsIssuerPRoviderNoderResp : "+ canActAsIssuerPRoviderNoderResp);
+     System.out.println("canActAsIssuerPRoviderNoderResp : "+ canActAsIssuerPRoviderNoderResp);*/
 
 
         /**
@@ -93,13 +93,13 @@ public class CantonOrchestratorProviderNode {
          * canReadAsIssuerPRoviderNoderResp : {"newlyGrantedRights":[{"kind":{"CanReadAs":{"value":{"party":"issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549"}}}}]}
          */
 
-     String canReadAsIssuerPRoviderNoderResp = new UserToPartyMapping().grantReadAs(System.getProperty("issuer_jsonapibase"),
+     /*String canReadAsIssuerPRoviderNoderResp = new UserToPartyMapping().grantReadAs(System.getProperty("issuer_jsonapibase"),
              System.getProperty("issuer_realm"),
              System.getProperty("issuer_clientid"),
              System.getProperty("issuer_clientsecret"),
              "972c49c6-ee4f-4bcd-a012-2e34902b7cb0",
              "issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549");
-     System.out.println("canReadAsIssuerPRoviderNoderResp : "+ canReadAsIssuerPRoviderNoderResp);
+     System.out.println("canReadAsIssuerPRoviderNoderResp : "+ canReadAsIssuerPRoviderNoderResp);*/
 
 
         /****
@@ -137,7 +137,7 @@ public class CantonOrchestratorProviderNode {
      System.out.println("mintAutorityResponse : "+ mintAutorityResponse);*/
 
 
-        String receiverParty = "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b";//Generated after party creation on user node
+        /*String receiverParty = "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b";//Generated after party creation on user node
         String issuerParty = "issuerParty::12201b77d72e0ed7442d250d61ca79319569f98cbfd215a044a74531ae86ba6b1549";//Generated after creating issuer party on provider node
         //Fetch the mintauthority(offset should be from the offset coming from mintAutorityResponse
         String mintAuthorityContractId = new InitializeContract().findMintAuthorityContractId(System.getProperty("issuer_jsonapibase"), System.getProperty("issuer_realm"),
@@ -160,7 +160,7 @@ public class CantonOrchestratorProviderNode {
             "100"
             );
 
-    System.out.println("mintResponse : " + mintResponse);
+    System.out.println("mintResponse : " + mintResponse);*/
 
     }
     }

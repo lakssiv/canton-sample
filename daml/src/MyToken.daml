@@ -20,32 +20,13 @@ template MintAuthority
   where
     signatory issuer
 
-    nonconsuming choice Mint : ContractId PendingHolding
+    nonconsuming choice Mint : ContractId Holding
       with
         owner : Party
         amount : Decimal
       controller issuer
       do
         assertMsg "Amount must be positive" (amount > 0.0)
-        create PendingHolding with
-          issuer = issuer
-          owner = owner
-          instrumentId = instrumentId
-          amount = amount
-
-template PendingHolding
-  with
-    issuer : Party
-    owner : Party
-    instrumentId : Text
-    amount : Decimal
-  where
-    signatory issuer
-    observer owner
-
-    choice Accept : ContractId Holding
-      controller owner
-      do
         create Holding with
           issuer = issuer
           owner = owner
@@ -59,8 +40,8 @@ template Holding
     instrumentId : Text
     amount : Decimal
   where
-    signatory owner
-    observer issuer
+    signatory issuer
+    observer owner
 
     choice Transfer : (ContractId Holding, Optional (ContractId Holding))
       with

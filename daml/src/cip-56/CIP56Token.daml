@@ -1,0 +1,176 @@
+module CIP56Token where
+
+import qualified Canton.Network.RC1.TokenMetadata as RC1
+import qualified Canton.Network.RC2.Holding as RC2
+import qualified Canton.Network.RC3.TransferInstruction as RC3
+
+-- This module is RC1/RC2/RC3 aligned, but not a full CIP-56 implementation.
+-- In particular, it omits allocation workflows and delegated transfer execution.
+
+template TokenRegistry
+  with
+    admin : Party
+    issuer : Party
+    instrumentCode : Text
+    displayName : Text
+    symbol : Text
+    metadata : RC1.Metadata
+  where
+    signatory admin
+    observer issuer
+
+    interface instance RC3.TransferFactory for TokenRegistry where
+      view = RC3.TransferFactoryView with
+        admin = admin
+
+      transferFactory_transferImpl transferSpecification extraArgs = do
+        now <- getTime
+        let transfer = transferSpecification.transfer
+        assertMsg "Transfer must target this registry instrument"
+          (transfer.instrumentId == mkInstrumentId admin instrumentCode)
+        assertMsg "Delegated transfer execution is not implemented in this simplified module"
+          (transferSpecification.executionDelegate == None)
+        assertMsg "Transfer instruction must not be expired"
+          (now < transferSpecification.executeBefore)
+        assertMsg "Atomic transfers require explicit holding contract ids"
+          (not $ null transferSpecification.holdingCids)
+        transferFromHoldings
+          transfer.sender
+          transfer.receiver
+          transfer.instrumentId
+          transfer.amount
+          transferSpecification.holdingCids
+        pure RC3.TransferFactory_TransferResult with
+          optTransferInstructionCid = None
+          meta = extraArgs.meta
+
+template MintAuthority
+  with
+    issuer : Party
+    instrumentId : RC2.InstrumentId
+  where
+    signatory issuer
+
+    nonconsuming choice Mint : ContractId TokenHolding
+      with
+        owner : Party
+        amount : Decimal
+        holdingMetadata : RC1.Metadata
+      controller issuer
+      do
+        assertMsg "Amount must be positive" (amount > 0.0)
+        create TokenHolding with
+          issuer
+          owner
+          instrumentId
+          amount
+          metadata = holdingMetadata
+
+template TokenHolding
+  with
+    issuer : Party
+    owner : Party
+    instrumentId : RC2.InstrumentId
+    amount : Decimal
+    metadata : RC1.Metadata
+  where
+    signatory issuer
+    observer owner
+
+    interface instance RC2.Holding for TokenHolding where
+      view = RC2.HoldingView with
+        owner
+        instrumentId
+        amount
+        lock = None
+        metadata
+
+    choice Transfer : (ContractId TokenHolding, Optional (ContractId TokenHolding))
+      with
+        newOwner : Party
+        transferAmount : Decimal
+      controller owner
+      do
+        assertMsg "Transfer amount must be positive" (transferAmount > 0.0)
+        assertMsg "Transfer amount exceeds balance" (transferAmount <= amount)
+
+        transferredCid <- create TokenHolding with
+          issuer
+          owner = newOwner
+          instrumentId
+          amount = transferAmount
+          metadata
+
+        if transferAmount == amount
+          then return (transferredCid, None)
+          else do
+            remainderCid <- create TokenHolding with
+              issuer
+              owner
+              instrumentId
+              amount = amount - transferAmount
+              metadata
+            return (transferredCid, Some remainderCid)
+
+    choice Burn : Optional (ContractId TokenHolding)
+      with
+        burnAmount : Decimal
+      controller owner
+      do
+        assertMsg "Burn amount must be positive" (burnAmount > 0.0)
+        assertMsg "Burn amount exceeds balance" (burnAmount <= amount)
+
+        if burnAmount == amount
+          then return None
+          else do
+            remainderCid <- create TokenHolding with
+              issuer
+              owner
+              instrumentId
+              amount = amount - burnAmount
+              metadata
+            return (Some remainderCid)
+
+mkInstrumentId : Party -> Text -> RC2.InstrumentId
+mkInstrumentId admin instrumentCode =
+  RC2.InstrumentId with
+    admin
+    id = instrumentCode
+
+transferFromHoldings
+  : Party
+  -> Party
+  -> RC2.InstrumentId
+  -> Decimal
+  -> [ContractId RC2.Holding]
+  -> Update ()
+transferFromHoldings sender receiver instrumentId requestedAmount holdingCids =
+  transferFromConcreteHoldings sender receiver instrumentId requestedAmount (map fromInterfaceContractId holdingCids)
+
+transferFromConcreteHoldings
+  : Party
+  -> Party
+  -> RC2.InstrumentId
+  -> Decimal
+  -> [ContractId TokenHolding]
+  -> Update ()
+transferFromConcreteHoldings sender receiver instrumentId remaining concreteCids =
+  if remaining == 0.0 then
+    pure ()
+  else
+    case concreteCids of
+      [] ->
+        fail "Insufficient holdings to fund transfer"
+      cid :: rest -> do
+        holding <- fetch cid
+        assertMsg "Transfer can only use sender-owned holdings" (holding.owner == sender)
+        assertMsg "Transfer can only use holdings for the requested instrument"
+          (holding.instrumentId == instrumentId)
+        let toMove =
+              if holding.amount <= remaining
+                then holding.amount
+                else remaining
+        _ <- exercise cid Transfer with
+          newOwner = receiver
+          transferAmount = toMove
+        transferFromConcreteHoldings sender receiver instrumentId (remaining - toMove) rest

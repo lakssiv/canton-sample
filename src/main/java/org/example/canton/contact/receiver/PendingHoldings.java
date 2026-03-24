@@ -17,7 +17,7 @@ import java.util.List;
 public class PendingHoldings {
 
     private static final OkHttpClient HTTP = new OkHttpClient();
-    public String findPendingHoldingContractIds(
+    /*public String findPendingHoldingContractIds(
             String jsonApiBaseUrl,
             String realm,
             String clientId,
@@ -81,7 +81,7 @@ public class PendingHoldings {
 
             return respBody;
         }
-    }
+    }*/
 
 
     public String findHoldingContractIds(
@@ -143,22 +143,23 @@ public class PendingHoldings {
             String respBody = response.body() == null ? "" : response.body().string();
 
             if (!response.isSuccessful()) {
-                throw new IOException("Find PendingHolding failed HTTP " + response.code() + " - " + respBody);
+                throw new IOException("Find Holding failed HTTP " + response.code() + " - " + respBody);
             }
 
             return respBody;
         }
     }
 
-
-    public String acceptPendingHolding(
+    public String transferHolding(
             String jsonApiBaseUrl,
             String realm,
             String clientId,
             String secret,
             String packageId,
-            String receiverParty,
-            String pendingHoldingCid
+            String ownerParty,
+            String holdingCid,
+            String newOwnerParty,
+            String transferAmount
     ) throws IOException {
 
         String token = TokenGenerator.generateToken(realm, clientId, secret);
@@ -167,33 +168,38 @@ public class PendingHoldings {
                 ? jsonApiBaseUrl + "v2/commands/submit-and-wait"
                 : jsonApiBaseUrl + "/v2/commands/submit-and-wait";
 
-        String templateId = packageId + ":MyToken:PendingHolding";
+        String templateId = packageId + ":MyToken:Holding";
 
         String json = """
         {
-          "workflowId": "accept-pending-holding",
+          "workflowId": "transfer-holding",
           "applicationId": "my-cip56-app",
-          "commandId": "accept-%s",
+          "commandId": "transfer-%s",
           "actAs": ["%s"],
           "commands": [
             {
               "ExerciseCommand": {
                 "templateId": "%s",
                 "contractId": "%s",
-                "choice": "Accept",
-                "choiceArgument": {}
+                "choice": "Transfer",
+                "choiceArgument": {
+                  "newOwner": "%s",
+                  "transferAmount": "%s"
+                }
               }
             }
           ]
         }
         """.formatted(
                 System.currentTimeMillis(),
-                receiverParty,
+                ownerParty,
                 templateId,
-                pendingHoldingCid
+                holdingCid,
+                newOwnerParty,
+                transferAmount
         );
 
-        System.out.println("acceptPendingHolding request = " + json);
+        System.out.println("transferHolding request = " + json);
 
         RequestBody body = RequestBody.create(
                 json,
@@ -211,13 +217,12 @@ public class PendingHoldings {
             String respBody = response.body() == null ? "" : response.body().string();
 
             if (!response.isSuccessful()) {
-                throw new IOException("Accept PendingHolding failed HTTP " + response.code() + " - " + respBody);
+                throw new IOException("Transfer Holding failed HTTP " + response.code() + " - " + respBody);
             }
             return respBody;
         }
     }
-
-    public List<String> extractPendingHoldingCids(String respBody) {
+    public List<String> extractHoldingCids(String respBody) {
 
         List<String> cids = new ArrayList<>();
 

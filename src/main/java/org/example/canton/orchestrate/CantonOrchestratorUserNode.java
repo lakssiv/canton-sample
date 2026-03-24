@@ -9,8 +9,6 @@ import org.example.canton.user.onboarding.PartyOnboarding;
 import org.example.canton.user.onboarding.UserToPartyMapping;
 import org.example.canton.util.TokenGenerator;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,20 +25,22 @@ public class CantonOrchestratorUserNode {
 
         props.put("user1_holder1_clientid", "user1-holder1");
         props.put("user1_holder1_clientsecret", "vwSIO9JPiZduCbBWEChWUExW95JGevcG");
+        props.put("holder1_party", "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
+        props.put("holder2_party", "receiverParty1::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
 
 
 
         props.put("keycloakbase_url", "http://localhost:8082");
-        props.put("dar_path", "/Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token1-0.0.2.dar");
+        props.put("dar_path", "/Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token2-0.0.2.dar");
 
 
         /****
          * Figure out the template id of your dar
          * daml damlc inspect-dar --json /Users/thomaseapen/IdeaProjects/canton-poc/daml/.daml/dist/my-token1-0.0.2.dar
-         * Look for ---> "main_package_id": "7e6e32645c4864b476c6e5bcf88fddadadff9e7f15f61613043e04d0d2dab9f6"
+         * Look for ---> "main_package_id": "6771ae179d3feb2f3e36b31ab0933374e7274c9731305f8cdd885d36418ea5a2"
          */
 
-        props.put("drl_package_id", "7e6e32645c4864b476c6e5bcf88fddadadff9e7f15f61613043e04d0d2dab9f6");
+        props.put("drl_package_id", "6771ae179d3feb2f3e36b31ab0933374e7274c9731305f8cdd885d36418ea5a2");
 
         String darDeployUserNodeReponse = new DeployDar().deployDar(System.getProperty("user1_jsonapibase"), System.getProperty("dar_path"), System.getProperty("user1_realm"), System.getProperty("user1_admin_clientid"), System.getProperty("user1_admin_clientsecret"));
         System.out.println("darDeployUserNodeReponse : "+ darDeployUserNodeReponse);
@@ -57,10 +57,16 @@ public class CantonOrchestratorUserNode {
         /****
          * Create receiverparty party on Provider Node
          * holderPArtyCreateResponse : {"partyDetails":{"party":"receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b","isLocal":true,"localMetadata":{"resourceVersion":"0","annotations":{}},"identityProviderId":""}}
+         * holderPArtyCreateResponse : {"partyDetails":{"party":"receiverParty1::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b","isLocal":true,"localMetadata":{"resourceVersion":"0","annotations":{}},"identityProviderId":""}}
          */
 
-        //String holderPArtyCreateResponse = new PartyOnboarding().createParty(System.getProperty("user1_jsonapibase"), System.getProperty("user1_realm"), System.getProperty("user1_admin_clientid"), System.getProperty("user1_admin_clientsecret"), "receiverParty", "Receiver Party");
-        //System.out.println("holderPArtyCreateResponse : "+ holderPArtyCreateResponse);
+        /*String holderPArtyCreateResponse = new PartyOnboarding().createParty(System.getProperty("user1_jsonapibase"), System.getProperty("user1_realm"), System.getProperty("user1_admin_clientid"), System.getProperty("user1_admin_clientsecret"), "receiverParty", "Receiver Party");
+        System.out.println("holderPArtyCreateResponse : "+ holderPArtyCreateResponse);*/
+
+       //Create another party for transfer
+        /*String holderPArtyCreateResponse = new PartyOnboarding().createParty(System.getProperty("user1_jsonapibase"), System.getProperty("user1_realm"), System.getProperty("user1_admin_clientid"), System.getProperty("user1_admin_clientsecret"), "receiverParty1", "Receiver Party1");
+        System.out.println("holderPArtyCreateResponse : "+ holderPArtyCreateResponse);*/
+        
 
 
         /****
@@ -85,6 +91,15 @@ public class CantonOrchestratorUserNode {
              System.getProperty("user1_admin_clientsecret"),
              "0bb575d1-b3ef-46aa-bb75-36e3fb8dc5e1",
              "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
+     System.out.println("canActAsUserNoderResp : "+ canActAsUserNoderResp);
+
+
+     String canActAsUserNoderResp = new UserToPartyMapping().grantActAs(System.getProperty("user1_jsonapibase"),
+             System.getProperty("user1_realm"),
+             System.getProperty("user1_admin_clientid"),
+             System.getProperty("user1_admin_clientsecret"),
+             "0bb575d1-b3ef-46aa-bb75-36e3fb8dc5e1",
+             "receiverParty1::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
      System.out.println("canActAsUserNoderResp : "+ canActAsUserNoderResp);*/
 
         /**
@@ -98,6 +113,14 @@ public class CantonOrchestratorUserNode {
                 System.getProperty("user1_admin_clientsecret"),
                 "0bb575d1-b3ef-46aa-bb75-36e3fb8dc5e1",
                 "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
+        System.out.println("canActAsUserNoderResp : "+ canReadAsUserNoderResp);
+
+        String canReadAsUserNoderResp = new UserToPartyMapping().grantReadAs(System.getProperty("user1_jsonapibase"),
+                System.getProperty("user1_realm"),
+                System.getProperty("user1_admin_clientid"),
+                System.getProperty("user1_admin_clientsecret"),
+                "0bb575d1-b3ef-46aa-bb75-36e3fb8dc5e1",
+                "receiverParty1::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b");
         System.out.println("canActAsUserNoderResp : "+ canReadAsUserNoderResp);*/
 
 /**
@@ -111,34 +134,30 @@ public class CantonOrchestratorUserNode {
         );
 
 
-        String getPendingHoldings = new PendingHoldings().findPendingHoldingContractIds(System.getProperty("user1_jsonapibase"),
-                System.getProperty("user1_realm"),
-                System.getProperty("user1_holder1_clientid"),
-                System.getProperty("user1_holder1_clientsecret"),
-                System.getProperty("drl_package_id"),
-                "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b",
-                latestOffset);
-        System.out.println("getPendingHoldings : "+ getPendingHoldings);
-        List<String> pendingCid =  new PendingHoldings().extractPendingHoldingCids(getPendingHoldings);
-        for(String cid : pendingCid){
-            String approvePending  = new PendingHoldings().acceptPendingHolding(System.getProperty("user1_jsonapibase"),
-                    System.getProperty("user1_realm"),
-                    System.getProperty("user1_holder1_clientid"),
-                    System.getProperty("user1_holder1_clientsecret"),
-                    System.getProperty("drl_package_id"),
-                    "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b",
-                    cid);
-            System.out.println("approvePending : "+ approvePending);
-        }
-
         String getHoldings = new PendingHoldings().findHoldingContractIds(System.getProperty("user1_jsonapibase"),
                 System.getProperty("user1_realm"),
                 System.getProperty("user1_holder1_clientid"),
                 System.getProperty("user1_holder1_clientsecret"),
                 System.getProperty("drl_package_id"),
-                "receiverParty::12200c976252f32c7f6328d158172a5ff7e4eddbd3e5db9116560478587433ba7f4b",
-                10472);
-System.out.println("getHoldings : "+ getHoldings);
+                System.getProperty("holder1_party"),
+                latestOffset);
+        System.out.println("getHoldings : "+ getHoldings);
 
+        List<String> holdingCids = new PendingHoldings().extractHoldingCids(getHoldings);
+        if (!holdingCids.isEmpty()) {
+            String transferHoldingResponse = new PendingHoldings().transferHolding(
+                    System.getProperty("user1_jsonapibase"),
+                    System.getProperty("user1_realm"),
+                    System.getProperty("user1_holder1_clientid"),
+                    System.getProperty("user1_holder1_clientsecret"),
+                    System.getProperty("drl_package_id"),
+                    System.getProperty("holder1_party"),
+                    holdingCids.get(0),
+                    System.getProperty("holder2_party"),
+                    "5"
+            );
+            System.out.println("transferHoldingResponse : " + transferHoldingResponse);
+        
+        }
     }
 }
